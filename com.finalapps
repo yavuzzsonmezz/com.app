@@ -1,0 +1,82 @@
+package com.finalapps;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Scanner;
+
+public class Main {
+
+    public static void main(String[] args) throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        student s = new student();
+        s.getStudentDetails();
+        s.insertStudent();
+    }
+}
+
+//make a student class that will get all the functionalities of student
+class student{
+    private String name;
+    private String email;
+    private String gender;
+    private int phone;
+
+    //function that ask student to enter his details
+    public void getStudentDetails(){
+        Scanner input = new Scanner(System.in);
+        System.out.println("Enter Your Name: ");
+        name = input.nextLine();
+        System.out.println("Enter Your Email: ");
+        email = input.nextLine();
+        System.out.println("Enter Your Gender: ");
+        gender = input.nextLine();
+        System.out.println("Enter Your Phone: ");
+        phone = input.nextInt();
+    }
+
+    //function that save the student record into mysql database
+    public void insertStudent() throws SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        //we need to call my jdbc connection function/constructor
+        dbmsconnection dbmsconnection = new dbmsconnection("jdbc:mysql://localhost:3306/jdbc_nt?SSL=false","root","123456789");
+        Connection con = dbmsconnection.getConnection();
+        //writing the mysql query for inserting the data into student table
+        String sql = "insert into student(name,email,gender,phone) values(?,?,?,?);";
+        //use the PreparedStatemnt for taking the input into each column
+        PreparedStatement stmt = con.prepareStatement(sql);
+        stmt.setString(1,name);
+        stmt.setString(2,email);
+        stmt.setString(3,gender);
+        stmt.setInt(4,phone);
+
+        //execute your preparedStatement
+        int i = stmt.executeUpdate();
+        System.out.println("Student record has been saved successfully!");
+
+    }
+
+}
+//make a class that contains the JDB connection
+class dbmsconnection{
+    String url;
+    String username;
+    String password;
+
+    //make a constructor that defines my above 3 variables
+    public dbmsconnection(String url,String username,String password){
+        this.url = url;
+        this.username = username;
+        this.password = password;
+    }
+
+    //need to make a function that calls the JDBC driver
+    public Connection getConnection() throws ClassNotFoundException, InstantiationException, IllegalAccessException, SQLException {
+        Connection con = null;
+        //calling my jdbc driver
+        Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+        con = DriverManager.getConnection(url,username,password);
+        System.out.println("Database connection has been successfully established!");
+        return con;
+    }
+
+}
